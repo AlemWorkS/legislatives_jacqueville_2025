@@ -18,7 +18,6 @@ return new class extends Migration
             $table->string('prenom');
             $table->string('password');
             $table->boolean('is_admin')->default(false);
-            $table->enum('role', ['admin', 'superviseur', 'agent'])->default('agent');
             $table->timestamps('');
         });
 

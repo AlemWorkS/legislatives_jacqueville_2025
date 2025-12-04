@@ -12,7 +12,6 @@ return new class extends Migration {
             $table->foreignId('agent_id')->references('id')->on('users')->cascadeOnDelete();
             $table->timestamp('moment_recensement');
             $table->integer('nb_vote_cumule');
-            $table->json('data')->nullable();
             $table->timestamps();
         });
     }
