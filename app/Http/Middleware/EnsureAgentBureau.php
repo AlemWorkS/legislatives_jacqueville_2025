@@ -8,22 +8,42 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
-
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 class EnsureAgentBureau
 {
     public function handle(Request $request, Closure $next): Response
     {
-        /** @var User */
-        $user = Auth::user();
-        $userRole = $user->role()->pluck('lib_role')->first();
 
+
+        // 1. Assurez-vous d'abord que l'utilisateur est bien l'utilisateur actuellement connecté
+        /** @var \App\Models\User|null $user */
+        $user = Auth::user();
+
+        // Déterminer le rôle
+        $userRole = $user ? $user->role()->pluck('lib_role')->first() : null;
+
+        // 2. Vérification de l'accès
+        // Si l'utilisateur n'est pas connecté OU si le rôle ne correspond pas au rôle autorisé
         if ($user === null || $userRole !== Roles::AGENT_BUREAU->value) {
 
-            Log::debug('Unauthorized access attempt to recenser route.', ['user' => Auth::user()]);
-            abort(403, 'Oups ! La page demandé est inaccessible.');
+            // Enregistrement du debug
+            Log::warning('Tentative d\'accès non autorisée à la route recenser.', [
+                'user_id' => $user ? $user->id : 'Non-connecté',
+                'attempted_role' => $userRole,
+            ]);
+
+            // Déconnexion de l'utilisateur (si l'objet user existe)
+            if ($user !== null) {
+                Auth::logout(); // <-- CORRECTION : C'est la bonne méthode de déconnexion
+            }
+
+            // Abandonne la requête et renvoie une erreur 403 Forbidden
+            // Utilisez AccessDeniedHttpException pour plus de clarté
+            throw new AccessDeniedHttpException('Oups ! La page demandée est inaccessible.');
         }
 
+        // ... Si l'exécution arrive ici, l'utilisateur est autorisé.
         return $next($request);
     }
 }

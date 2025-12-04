@@ -1,90 +1,150 @@
 import { useState } from "react";
 import { toast } from "react-toastify";
-export default function RecenserDashboard({ bureau, lastCumul }) {
+// IMPORTANT : Assurez-vous d'importer Link pour la déconnexion et usePage pour l'accès aux props
+import { Link, usePage } from '@inertiajs/react';
+import FinishMessageBox from "@/Components/FinishMessageBox";
 
-  const [cumul, setCumul] = useState(lastCumul);
-  const [value, setValue] = useState("");
+export default function RecenserDashboard({ lieu, lastCumul, isFinish }) {
 
-  const handleConfirm = async () => {
-    const num = Number.parseInt(value);
+    // Utilisation de usePage pour accéder aux props globales Inertia,
+    // y compris 'auth' si elle est partagée.
+    const { props } = usePage();
+    const { user } = props.auth; // Suppose que les données sont sous props.auth.user
 
-    if (Number.isNaN(num) || num <= cumul) {
-      toast.error("Le nombre doit être supérieur au cumul actuel.");
-      return;
+    const [cumul, setCumul] = useState(lastCumul);
+    const [value, setValue] = useState("");
+    const [isLoading, setIsLoading] = useState(false);
+    const [finish, setFinish] = useState(isFinish);
+
+
+        if(finish) {
+        return <FinishMessageBox message="Il n'est plus possible de faire le recensement cher agent Merci pour votre contribution :)"/>;
     }
 
-    try {
-      const res = await axios.post("/agent_bureau/store", {
-        bureau_id: bureau.id,
-        nombre_recenses: num,
-      });
+    const handleConfirm = async () => {
+        const num = Number.parseInt(value);
 
-      setCumul(res.data.lastCumul);
-      toast.success("Recensement enregistré !");
-      setValue("");
+        if (Number.isNaN(num) || num <= cumul) {
+            toast.error("Le nombre saisi doit être un total cumulé supérieur au dernier total (" + cumul + ").");
+            return;
+        }
 
-    } catch (e) {
-      console.error(e);
-      toast.error("Erreur lors de l’enregistrement");
-    }
-  };
+        setIsLoading(true);
 
-  return (
-    <div className="w-full h-screen bg-gray-100 flex justify-center items-center p-6">
-      <div className="w-full max-w-6xl bg-white border rounded-xl shadow-md p-6 flex">
+        try {
+            const res = await axios.post("/agent_lieu/store", {
+                lieu_id: lieu.id,
+                nombre_recenses: num,
+            });
 
-        {/* Colonne gauche */}
-        <div className="w-1/4 border-r pr-4">
-          <div className="bg-yellow-200 text-lg font-semibold px-4 py-3 rounded-md border">
-            RECENSER
-          </div>
+            setCumul(res.data.lastCumul);
+            toast.success("Recensement enregistré avec succès !");
+            setValue("");
+
+        } catch (e) {
+            console.error(e);
+            const errorMessage = e.response?.data?.message || "Erreur lors de l’enregistrement. Vérifiez votre connexion.";
+            toast.error(errorMessage);
+
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+
+
+    return (
+        <div className="w-full min-h-screen bg-gray-100 flex justify-center items-start md:items-center py-6 md:py-12 px-4">
+            <div className="w-full max-w-6xl bg-white border rounded-xl shadow-2xl p-6 flex flex-col md:flex-row gap-6">
+
+                {/* Colonne gauche (Infos Utilisateur & Logout) */}
+                <div className="w-full md:w-1/4 md:border-r md:pr-4 flex flex-col justify-between">
+
+                    {/* Infos Utilisateur et lieu */}
+                    <div>
+                        {/* Carte Utilisateur */}
+                        <div className="bg-gray-100 p-4 rounded-lg border mb-4 shadow-sm">
+                            <p className="text-sm font-semibold text-gray-700">Connecté en tant que:</p>
+                            <h3 className="text-lg font-bold text-gray-900 mt-1">
+                                {user.prenom} {user.nom}
+                            </h3>
+                            <p className="text-sm text-yellow-600 mt-1">
+                                Rôle: {user.role || 'Agent de lieu'}
+                                {/* Remplacez 'Agent de lieu' par la propriété de rôle réelle */}
+                            </p>
+                        </div>
+
+                        {/* Carte lieu Actuel */}
+                        <div className="bg-yellow-200 text-center md:text-left text-lg font-bold px-4 py-3 rounded-md border border-yellow-400">
+                            <span className="text-sm font-normal text-gray-700 block">lieu:</span>
+                            {lieu.lib_lieu} ({lieu.id})
+                        </div>
+                    </div>
+
+                    {/* Bouton de Déconnexion (Collé en bas à gauche sur desktop) */}
+                    <div className="mt-6 md:mt-0 pt-4 md:pt-0 border-t md:border-t-0">
+                        <Link
+                            href={route('logout')} // Assurez-vous que cette route existe
+                            method="post"
+                            as="button"
+                            className="w-full bg-red-500 text-white py-2 rounded-lg font-semibold hover:bg-red-600 transition duration-150"
+                        >
+                            Se Déconnecter
+                        </Link>
+                    </div>
+
+                </div>
+
+                {/* Colonne centrale (Affichage) */}
+                <div className="w-full md:w-1/2 md:px-4">
+                    <div className="border border-gray-300 rounded-lg p-6 mb-6 bg-blue-50">
+                        <h2 className="text-lg font-semibold mb-4 text-gray-800 text-center">
+                            Nombre cumulé de votants (Total actuel)
+                        </h2>
+                        <p className="text-5xl font-extrabold text-center text-blue-700 animate-pulse">
+                            {cumul}
+                        </p>
+                    </div>
+                    <div className="border border-gray-300 rounded-lg p-4 bg-white">
+                        <h2 className="text-xl font-semibold mb-2">
+                            Répartition des voies
+                        </h2>
+                        <p className="text-gray-500">En construction…</p>
+                    </div>
+                </div>
+
+                {/* Colonne droite (Action) */}
+                <div className="w-full md:w-1/4 md:border-l md:pl-4 flex flex-col justify-center pt-4 md:pt-0">
+
+                    <h3 className="text-lg font-semibold mb-2 text-gray-800">
+                        Nouvel enregistrement
+                    </h3>
+                    <p className="text-sm text-gray-600 mb-2">
+                        Saisissez le **nouveau cumul total** des votants.
+                    </p>
+
+                    <input
+                        type="number"
+                        className="border border-gray-300 p-3 rounded-lg mb-4 w-full focus:ring-yellow-500 focus:border-yellow-500 transition duration-150"
+                        placeholder={`Total minimum : ${cumul + 1}`}
+                        value={value}
+                        onChange={(e) => setValue(e.target.value)}
+                        disabled={isLoading}
+                    />
+
+                    <button
+                        onClick={handleConfirm}
+                        className={`py-3 rounded-lg font-semibold transition duration-200
+                            ${isLoading
+                                ? 'bg-gray-400 text-gray-700 cursor-not-allowed'
+                                : 'bg-yellow-400 text-gray-900 border border-yellow-500 hover:bg-yellow-500'
+                            }`}
+                        disabled={isLoading || !value}
+                    >
+                        {isLoading ? 'Enregistrement...' : 'Confirmer le cumul'}
+                    </button>
+                </div>
+            </div>
         </div>
-
-        {/* Colonne centrale */}
-        <div className="w-1/2 px-4">
-          {/* Bloc nombre cumulé */}
-          <div className="border rounded-md p-4 mb-6">
-            <h2 className="text-xl font-semibold mb-4">
-              Nombre cumulé de votant
-            </h2>
-
-            <p className="text-3xl font-bold text-center">{cumul}</p>
-          </div>
-
-          {/* Bloc répartition */}
-          <div className="border rounded-md p-4">
-            <h2 className="text-xl font-semibold mb-2">
-              Répartition des voies
-            </h2>
-
-            <p className="text-gray-500">En construction…</p>
-          </div>
-        </div>
-
-        {/* Colonne droite */}
-        <div className="w-1/4 border-l pl-4 flex flex-col justify-center">
-
-          <p className="text-sm text-gray-600 mb-2">
-            Ajoutez le nombre cumulé actuel
-          </p>
-
-          <input
-            type="number"
-            className="border p-2 rounded-md mb-4 w-full"
-            placeholder="Saisir un nombre"
-            value={value}
-            onChange={(e) => setValue(e.target.value)}
-          />
-
-          <button
-            onClick={handleConfirm}
-            className="bg-yellow-300 border border-yellow-500 py-2 rounded-md font-semibold hover:bg-yellow-400"
-          >
-            Confirmer
-          </button>
-        </div>
-
-      </div>
-    </div>
-  );
+    );
 }

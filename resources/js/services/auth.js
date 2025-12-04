@@ -20,11 +20,11 @@ export async function handleLogin(data) {
         console.log("Login réussi :", result);
 
         // Exemple de redirection selon rôle
-        if (result.role === "admin") {
+        /*if (result.role === "admin") {
             window.location.href = "/admin";
         } else if (result.role === "agent de bureau") {
             window.location.href = "/dashboard";
-        }
+        }*/
 
     } catch (error) {
         console.error("Erreur auth :", error.response?.data || error.message);

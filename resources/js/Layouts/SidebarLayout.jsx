@@ -11,17 +11,16 @@ export default function Sidebar() {
         <div className="text-lg font-bold">📊 Superviseur</div>
         <div className="text-xs text-gray-400">Vue d'ensemble</div>
       </div>
-
       <nav className="flex flex-col gap-2">
-        <button onClick={() => api.get('/supervisor')} className="text-left p-2 rounded hover:bg-gray-800">Dashboard</button>
-        <button onClick={() => api.get('/supervisor/recensements')} className="text-left p-2 rounded hover:bg-gray-800">Recensements</button>
+        <Link href="/supervisor" className="text-left p-2 rounded hover:bg-gray-800">Metrics</Link>
+        <Link href='/supervisor/dash/recensements' className="text-left p-2 rounded hover:bg-gray-800">Recensements</Link>
         <button onClick={() => api.get('/supervisor/anomalies')} className="text-left p-2 rounded hover:bg-gray-800">Anomalies</button>
         <Link href="/supervisor/lieux" className="block hover:bg-gray-700 p-2 rounded">
             Lieux
           </Link>
         <hr className="my-4 border-gray-800" />
         <div className="text-xs text-gray-400 px-2">Filtrer rapidement</div>
-        <button onClick={() => api.get('/supervisor/recensements', { from: new Date().toISOString().slice(0,10) })} className="text-left p-2 rounded hover:bg-gray-800">Aujourd'hui</button>
+        <button onClick={() => api.post('/logout', { from: new Date().toISOString().slice(0,10) })} className="text-left p-2 rounded hover:bg-gray-800">Deconnection</button>
       </nav>
     </aside>
   );

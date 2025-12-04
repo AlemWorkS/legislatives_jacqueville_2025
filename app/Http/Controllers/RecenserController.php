@@ -3,28 +3,30 @@
 namespace App\Http\Controllers;
 
 use App\Models\Bureau;
+use App\Models\Lieu;
 use App\Models\Recensement;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
-class RecenserBureauController extends Controller
+class RecenserController extends Controller
 {
 
     public function index(Request $request)
     {
 
         $agent = $request->user();
-        $bureau = Bureau::where('user_id', $agent->id)->first();
+        $lieu = Lieu::where('user_id', $agent->id)->first();
 
         // Dernier recensement du bureau
 
-        $last = Recensement::where('bureau_id', $bureau->id)
+        $last = Recensement::where('lieu_id', $lieu->id)
             ->latest('moment_recensement')        // ou latest('created_at') selon ce que tu utilises
             ->value('nb_vote_cumule');
 
         return Inertia::render('Agent/Bureau/RecenserDashboard', [
-            'bureau' => $bureau,
+            'lieu' => $lieu,
             'lastCumul' => $last ?? 0,
+            'isFinish' => $lieu->deliberation_fini
         ]);
     }
 

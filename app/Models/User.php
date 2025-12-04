@@ -35,4 +35,9 @@ class User extends Authenticatable
     {
         return $this->hasOne(User::class); // un bureau possède un agent
     }
+
+    public function lieu()
+    {
+        return $this->hasOne(Lieu::class); // un Lieu possède un agent
+    }
 }

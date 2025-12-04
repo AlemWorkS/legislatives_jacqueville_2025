@@ -1,17 +1,24 @@
-import { handleLogin } from "@/services/auth";
 import { Head, useForm } from "@inertiajs/react";
+// Vous n'avez plus besoin d'importer handleLogin si vous utilisez la méthode Inertia post
+// import { handleLogin } from "@/services/auth";
 
 export default function Login() {
     // useForm d'Inertia gère les champs + soumission
-    const { data, setData, processing, errors } = useForm({
+    const { data, setData, processing, errors, post } = useForm({ // <-- Ajout de 'post'
         num: "",
         password: "",
     });
 
-    async function submit(e) {
-        e.preventDefault();
-        await handleLogin(data);
-    } 
+    function submit(e) {
+    e.preventDefault();
+
+    // Inertia soumet le formulaire et gère:
+    // - Echec (422) -> peuplement de l'objet 'errors'
+    // - Succès (302) -> redirection vers la bonne page
+    post(route('login'));
+
+        // --- FIN MODIFICATION CRUCIALE ---
+    }
 
     return (
         <>
@@ -22,7 +29,6 @@ export default function Login() {
                         Connexion
                     </h1>
 
-                    {/* Formulaire */}
                     <form onSubmit={submit} className="space-y-4">
                         <div>
                             <label htmlFor="tel" className="block mb-1 text-sm">
@@ -37,8 +43,9 @@ export default function Login() {
                                 placeholder="Ex : 0708123456"
                                 required
                             />
+                            {/* L'affichage des erreurs est déjà correct, Inertia va le peupler */}
                             {errors.num && (
-                                <div className="text-red-500">{errors.num}</div>
+                                <div className="text-red-500 text-sm mt-1">{errors.num}</div>
                             )}
                         </div>
 
@@ -61,7 +68,7 @@ export default function Login() {
                                 required
                             />
                             {errors.password && (
-                                <div className="text-red-500">
+                                <div className="text-red-500 text-sm mt-1">
                                     {errors.password}
                                 </div>
                             )}
@@ -70,7 +77,7 @@ export default function Login() {
                         <button
                             type="submit"
                             disabled={processing}
-                            className="w-full p-2 bg-blue-500 hover:bg-blue-600 rounded font-semibold"
+                            className="w-full p-2 bg-blue-500 hover:bg-blue-600 rounded font-semibold transition duration-150 disabled:bg-gray-500 disabled:cursor-not-allowed"
                         >
                             {processing ? "Connexion..." : "Se connecter"}
                         </button>

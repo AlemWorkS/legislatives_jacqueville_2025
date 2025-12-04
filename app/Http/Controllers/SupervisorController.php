@@ -44,7 +44,7 @@ class SupervisorController extends Controller
     // Aggregated metrics (cached) — supports request filters (dynamic cache key)
     public function metrics(Request $request)
     {
-        $key = 'supervisor:metrics:' . md5(json_encode($request->only(['centre_id','zone_id','lieu_id','from','to'])));
+        $key = 'supervisor:metrics:' . md5(json_encode($request->only(['centre_id', 'zone_id', 'lieu_id', 'from', 'to'])));
         $data = Cache::remember($key, 30, function () use ($request) {
 
             $totalBureaux = Bureau::count();
@@ -95,74 +95,74 @@ class SupervisorController extends Controller
         return CentreResource::collection($centers);
     }
 
-    // Recensements logs paginated and filterable
     public function recensements(Request $request)
     {
-        $query = Recensement::with(['lieu', 'agent'])->orderBy('created_at', 'desc');
+        $query = Recensement::with(['lieu.zone.centre', 'agent'])
+            ->orderBy('created_at', 'desc');
 
-        // Filter by centre (centre_id), zone_id, lieu_id
-        if ($request->filled('centre_id')) {
-            $query->whereIn('lieu_id', function ($q) use ($request) {
-                $q->select('id')->from('lieux')->where('centre_id', $request->centre_id);
+        $query->when($request->centre_id, function ($q) use ($request) {
+            $q->whereHas('lieu', function ($sub) use ($request) {
+                $sub->where('centre_id', $request->centre_id);
             });
-        }
+        });
 
-        if ($request->filled('zone_id')) {
-            $query->whereIn('lieu_id', function ($q) use ($request) {
-                $q->select('id')->from('lieux')->where('zone_id', $request->zone_id);
+        $query->when($request->zone_id, function ($q) use ($request) {
+            $q->whereHas('lieu', function ($sub) use ($request) {
+                $sub->where('zone_id', $request->zone_id);
             });
-        }
+        });
 
-        if ($request->filled('lieu_id')) {
-            $query->where('lieu_id', $request->lieu_id);
-        }
+        $query->when($request->lieu_id, function ($q) use ($request) {
+            $q->where('lieu_id', $request->lieu_id);
+        });
 
-        // date range filters
-        if ($request->filled('from')) {
-            $query->whereDate('created_at', '>=', $request->from);
-        }
-        if ($request->filled('to')) {
-            $query->whereDate('created_at', '<=', $request->to);
-        }
+        $query->when(
+            $request->from,
+            fn($q) =>
+            $q->whereDate('created_at', '>=', $request->from)
+        );
 
-        // agent filter
-        if ($request->filled('agent_id')) {
-            $query->where('agent_id', $request->agent_id);
-        }
+        $query->when(
+            $request->to,
+            fn($q) =>
+            $q->whereDate('created_at', '<=', $request->to)
+        );
 
-        // allow export as CSV
+        $query->when(
+            $request->agent_id,
+            fn($q) =>
+            $q->where('agent_id', $request->agent_id)
+        );
+
+        // Export CSV
         if ($request->boolean('export_csv')) {
             $list = $query->get();
             $filename = 'recensements_export_' . now()->format('Ymd_His') . '.csv';
-            $headers = [
-                'Content-Type' => 'text/csv',
-                'Content-Disposition' => "attachment; filename={$filename}",
-            ];
 
-            $callback = function() use ($list) {
+            return response()->streamDownload(function () use ($list) {
                 $handle = fopen('php://output', 'w');
-                // header
-                fputcsv($handle, ['id', 'lieu_id', 'agent_id', 'nombre_votants', 'nb_inscrits', 'created_at']);
+                fputcsv($handle, ['ID', 'Lieu', 'Agent', 'Votants', 'Inscrits', 'Date']);
+
                 foreach ($list as $r) {
                     fputcsv($handle, [
                         $r->id,
-                        $r->lieu_id,
-                        $r->agent_id,
+                        $r->lieu?->nom ?? '',
+                        $r->agent?->name ?? '',
                         $r->nombre_votants,
                         $r->nb_inscrits ?? '',
-                        $r->created_at,
+                        $r->created_at->format('d/m/Y H:i'),
                     ]);
                 }
-                fclose($handle);
-            };
 
-            return response()->stream($callback, 200, $headers);
+                fclose($handle);
+            }, $filename);
         }
 
-        $list = $query->paginate(50);
-
-        return response()->json($list);
+        return response()->json(
+            $query->paginate(50)
+        );
     }
+
 
     // Anomalies detection (extendable)
     public function anomalies(Request $request)

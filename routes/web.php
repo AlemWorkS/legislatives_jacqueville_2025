@@ -2,22 +2,27 @@
 
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\DeliberationController;
 use App\Http\Controllers\LieuController;
-use App\Http\Controllers\RecenserBureauController;
+use App\Http\Controllers\RecenserController;
 use App\Http\Controllers\SupervisorController;
+use App\Http\Controllers\UserController;
 use App\Models\Bureau;
-use App\Models\Recensement;
+use App\Models\Lieu;
 use App\Models\Role;
 use App\Models\User;
 use App\Models\Zone;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
+require __DIR__ . '/auth.php';
+
+
 // CONNEXION
 Route::middleware('guest')->group(function () {
-
     Route::get('/', [AuthController::class, 'showLogin'])
+        ->name('login');
+    Route::get('login', [AuthController::class, 'showLogin'])
         ->name('login');
 });
 
@@ -29,27 +34,29 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
         return Inertia::render('AdminDashboard', [
             'roles' => Role::all(),
             'users' => User::all(),
+            'lieux' => Lieu::all(),
+            'bureaux' => Bureau::all(),
         ]);
     })->name('admin.dashboard');
 
-    Route::post('admin/register-user', [AdminController::class, 'registerUser']);
-    Route::post('admin/reset-password/{user}', [AdminController::class, 'resetPassword']);
+    Route::post('register-user', [AdminController::class, 'registerUser']);
 
     Route::prefix('api')->group(function () {
 
         Route::get('users', [AdminController::class, 'getUsersList']);
         Route::post('users', [AdminController::class, 'store']);
+        Route::delete('users/{user}', [UserController::class, 'destroy']);
+        Route::post('reset-password', [AdminController::class, 'resetPassword']);
     });
 });
 
 // SUPERVISOR ROUTES
 
-Route::middleware([''])->get('supervisor', [SupervisorController::class, 'index'])->name('supervisor.dashboard');
 
-require __DIR__ . '/auth.php';
 
 Route::middleware(['auth'])->prefix('supervisor')->group(function () {
     // Metrics, stats, zones, etc.
+    Route::get('/', [SupervisorController::class, 'index'])->name('supervisor.dashboard');
     Route::get('metrics', [SupervisorController::class, 'metrics']);
     Route::get('centers', [SupervisorController::class, 'centers']);
     Route::get('zones/{center}', [SupervisorController::class, 'zones']);
@@ -58,6 +65,9 @@ Route::middleware(['auth'])->prefix('supervisor')->group(function () {
     Route::get('anomalies', [SupervisorController::class, 'anomalies']);
     Route::get('results', [SupervisorController::class, 'results']);
     Route::get('lieux', [LieuController::class, 'index'])->name('supervisor.lieux');
+    Route::get('dash/recensements',function () {
+        return Inertia::render('Supervisor/Recensements');
+    });
 
     Route::prefix('api')->group(function () {
 
@@ -72,11 +82,14 @@ Route::middleware(['auth'])->prefix('supervisor')->group(function () {
 });
 
 // AGENT BUREAU ROUTES
-Route::middleware(['auth', 'agent_bureau'])->get('/dashboard', [RecenserBureauController::class, 'index']);
 
 Route::middleware(['auth', 'agent_bureau'])->prefix('agent_bureau')->group(function () {
 
-    Route::post('store', [RecenserBureauController::class, 'storeRecensement']);
-    Route::get('lastCumule/{bureau}', [RecenserBureauController::class, 'lastCumuleByBureau']);
+    Route::get('/dashboard', [RecenserController::class, 'index']);
+    Route::post('store', [RecenserController::class, 'storeRecensement']);
+    Route::get('lastCumule/{bureau}', [RecenserController::class, 'lastCumuleByBureau']);
+
+    Route::get("/deliberation", [DeliberationController::class, "index"]);
+    Route::post("/save_deliberation", [DeliberationController::class, "save"]);
 
 });

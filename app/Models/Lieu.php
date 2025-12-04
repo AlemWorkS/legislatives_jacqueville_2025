@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use LDAP\Result;
 
 class Lieu extends Model
 {
@@ -18,6 +19,7 @@ class Lieu extends Model
         'nb_inscrit',
         'nb_bureau',
         'centre_id',
+        'agent_responsable_id'
     ];
 
     protected $casts = [
@@ -60,6 +62,10 @@ class Lieu extends Model
     public function recensements()
     {
         return $this->hasMany(Recensement::class);
+    }
+
+    public function resultat(){
+        return $this->hasOne(Resultat::class);
     }
 
     /*

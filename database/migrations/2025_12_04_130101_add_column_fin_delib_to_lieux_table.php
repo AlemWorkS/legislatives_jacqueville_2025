@@ -12,13 +12,10 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('lieux', function (Blueprint $table) {
-            $table->foreignId('user_id')
-                ->nullable()
-                ->constrained('users')
-                ->nullOnDelete();
+            //
+            $table->boolean('deliberation_fini')->default(false);
         });
     }
-
 
     /**
      * Reverse the migrations.
@@ -26,8 +23,8 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('lieux', function (Blueprint $table) {
-            $table->dropForeign(['agent_reponsable_id']);
-            $table->dropColumn('agent_reponsable_id');
+            //
+            $table->dropColumn('deliberation_fini');
         });
     }
 };
