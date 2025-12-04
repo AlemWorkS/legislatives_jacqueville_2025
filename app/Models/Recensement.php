@@ -10,7 +10,6 @@ class Recensement extends Model
     protected $fillable = [
         'agent_id',
         'moment_recensement',
-        'data',
         'nb_vote_cumule',
         'lieu_id',
         'bureau_id'
