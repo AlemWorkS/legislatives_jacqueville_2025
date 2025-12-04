@@ -35,8 +35,8 @@ class AuthController extends Controller
 
         $redirectPath = match ($userRole) {
             'admin' => '/admin',
-            'agent de bureau' => '/agent_bureau/dashboard',
-            'supervisor' => '/supervisor',
+            'agent' => '/agent/dashboard',
+            'superviseur' => '/supervisor',
             default => '/',
         };
 

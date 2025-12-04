@@ -3,6 +3,9 @@ import { toast } from "react-toastify";
 // IMPORTANT : Assurez-vous d'importer Link pour la déconnexion et usePage pour l'accès aux props
 import { Link, usePage } from '@inertiajs/react';
 import FinishMessageBox from "@/Components/FinishMessageBox";
+import DeconnexionButton from "@/Components/DeconnexionButton";
+import NavigationButton from "@/Components/NavigationButton";
+import { HiDocumentText } from "react-icons/hi";
 
 export default function RecenserDashboard({ lieu, lastCumul, isFinish }) {
 
@@ -32,7 +35,7 @@ export default function RecenserDashboard({ lieu, lastCumul, isFinish }) {
         setIsLoading(true);
 
         try {
-            const res = await axios.post("/agent_lieu/store", {
+            const res = await axios.post("/agent/store", {
                 lieu_id: lieu.id,
                 nombre_recenses: num,
             });
@@ -81,18 +84,16 @@ export default function RecenserDashboard({ lieu, lastCumul, isFinish }) {
                         </div>
                     </div>
 
-                    {/* Bouton de Déconnexion (Collé en bas à gauche sur desktop) */}
-                    <div className="mt-6 md:mt-0 pt-4 md:pt-0 border-t md:border-t-0">
-                        <Link
-                            href={route('logout')} // Assurez-vous que cette route existe
-                            method="post"
-                            as="button"
-                            className="w-full bg-red-500 text-white py-2 rounded-lg font-semibold hover:bg-red-600 transition duration-150"
-                        >
-                            Se Déconnecter
-                        </Link>
-                    </div>
+                    <NavigationButton
+                            targetRoute="/agent/deliberation" // Remplacez par la route réelle
+                            label="Passer à la délibération"
+                            icon={HiDocumentText}
+                        />
 
+                    {/* Bouton de Déconnexion (Collé en bas à gauche sur desktop) */}
+                    <div className="mt-6 border-t pt-4">
+                        <DeconnexionButton/>
+                    </div>
                 </div>
 
                 {/* Colonne centrale (Affichage) */}
@@ -104,12 +105,6 @@ export default function RecenserDashboard({ lieu, lastCumul, isFinish }) {
                         <p className="text-5xl font-extrabold text-center text-blue-700 animate-pulse">
                             {cumul}
                         </p>
-                    </div>
-                    <div className="border border-gray-300 rounded-lg p-4 bg-white">
-                        <h2 className="text-xl font-semibold mb-2">
-                            Répartition des voies
-                        </h2>
-                        <p className="text-gray-500">En construction…</p>
                     </div>
                 </div>
 

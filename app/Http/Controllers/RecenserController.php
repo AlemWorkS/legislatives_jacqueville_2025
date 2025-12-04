@@ -34,23 +34,21 @@ class RecenserController extends Controller
     public function storeRecensement(Request $request)
     {
         $request->validate([
-            'bureau_id' => 'required|exists:bureaux,id',
+            'lieu_id' => 'required|exists:bureaux,id',
             'nombre_recenses' => 'required|integer|min:0',
         ]);
 
-        $bureau = Bureau::findOrFail($request->bureau_id);
+        $lieuId = $request->lieu_id;
 
         Recensement::create([
-            'bureau_id' => $bureau->id,
             'nb_vote_cumule' => $request->nombre_recenses,
             'agent_id' => $request->user()->id,
-            'lieu_id' => $bureau->lieu_id,
+            'lieu_id' => $lieuId,
             'moment_recensement' => date('Y-m-d H:i:s'),
-
         ]);
 
 
-        $last = Recensement::where('bureau_id', $bureau->id)
+        $last = Recensement::where('lieu_id', $lieuId)
             ->latest('moment_recensement')        // ou latest('created_at') selon ce que tu utilises
             ->value('nb_vote_cumule');
 
@@ -60,9 +58,9 @@ class RecenserController extends Controller
 
     public function lastCumuleByBureau(Request $request)
     {
-        $bureau = $request->input('bureau');
+        $lieu = $request->input('lieu');
 
-        $last = Recensement::where('bureau_id', $bureau)
+        $last = Recensement::where('lieu_id', $lieu)
             ->latest('id')        // ou latest('created_at') selon ce que tu utilises
             ->value('nb_vote_cumule');
 

@@ -55,13 +55,14 @@ class AdminController extends Controller
      * * @param User $user L'utilisateur à réinitialiser (via Route Model Binding).
      * @return \Illuminate\Http\JsonResponse
      */
-    public function resetPassword(User $user)
+    public function resetPassword(Request $request)
     {
         // 1. Générer un mot de passe temporaire clair et sécurisé (ex: 10 caractères)
         // Ceci est le mot de passe que l'utilisateur devra utiliser immédiatement.
         $newClearPassword = Str::random(12);
 
         // 2. Hacher le mot de passe pour le stockage dans la base de données
+        $user = User::where('id',$request->id)->first();
         $user->update([
             'password' => Hash::make($newClearPassword),
         ]);

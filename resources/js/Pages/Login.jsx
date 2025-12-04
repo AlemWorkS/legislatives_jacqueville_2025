@@ -11,7 +11,7 @@ export default function Login() {
 
     // Utiliser la méthode post fournie par useForm
     // route('login') doit être le nom de ta route POST (->name('login'))
-    post(route('login'), {
+    post(route('loginProcess'), {
       onSuccess: () => {
         // Si tu veux nettoyer le password après succès
         reset('password');

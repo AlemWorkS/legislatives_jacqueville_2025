@@ -4,6 +4,8 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import DeconnexionButton from "@/Components/DeconnexionButton";
 import FinishMessageBox from "@/Components/FinishMessageBox";
+import { HiChartBar } from "react-icons/hi";
+import NavigationButton from "@/Components/NavigationButton";
 
 export default function DeliberationDashboard({ lieu, resultats, candidats, isFinish }) {
 
@@ -25,7 +27,7 @@ export default function DeliberationDashboard({ lieu, resultats, candidats, isFi
         setIsLoading(true);
 
         try {
-            res = await axios.post("/agent_bureau/save_deliberation", {
+            res = await axios.post("/agent/save_deliberation", {
                 lieu_id: lieu.id,
                 scores,
                 user_id: user.id
@@ -93,6 +95,13 @@ export default function DeliberationDashboard({ lieu, resultats, candidats, isFi
                             </h2>
                         </div>
                     </div>
+
+                    {/* --- NOUVEAU : Lien vers Recensement --- */}
+                    <NavigationButton
+                        targetRoute="/agent/dashboard" // Remplacez par la route réelle
+                        label="Retour au recensement"
+                        icon={HiChartBar}
+                    />
 
                     {/* LOGOUT */}
                     <div className="mt-6 border-t pt-4">

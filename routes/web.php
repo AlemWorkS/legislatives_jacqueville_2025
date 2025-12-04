@@ -17,12 +17,11 @@ use Inertia\Inertia;
 
 require __DIR__ . '/auth.php';
 
-Route::get('', [AuthController::class, 'showLogin'])->name('login');
+Route::get('', [AuthController::class, 'showLogin'])->name('loginPage');
+Route::post('login', [AuthController::class, 'login'])->name('loginProcess');
+Route::get('login', [AuthController::class, 'showLogin'])->name('loginPage');
 
 // CONNEXION
-Route::middleware('guest')->group(function () {
-    Route::get('login', [AuthController::class, 'showLogin'])->name('login');
-});
 
 // ADMIN ROUTES
 
@@ -81,11 +80,11 @@ Route::middleware(['sup'])->prefix('supervisor')->group(function () {
 
 // AGENT BUREAU ROUTES
 
-Route::middleware(['agent_bureau'])->prefix('agent_bureau')->group(function () {
+Route::middleware(['agent'])->prefix('agent')->group(function () {
 
     Route::get('/dashboard', [RecenserController::class, 'index']);
     Route::post('store', [RecenserController::class, 'storeRecensement']);
-    Route::get('lastCumule/{bureau}', [RecenserController::class, 'lastCumuleByBureau']);
+    Route::get('lastCumule/{lieu}', [RecenserController::class, 'lastCumuleByBureau']);
 
     Route::get("/deliberation", [DeliberationController::class, "index"]);
     Route::post("/save_deliberation", [DeliberationController::class, "save"]);

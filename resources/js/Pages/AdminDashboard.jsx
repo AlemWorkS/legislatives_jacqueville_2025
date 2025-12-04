@@ -121,7 +121,9 @@ export default function AdminDashboard({ roles, users: initialUsers, lieux }) {
         setLoadingActions(prev => ({ ...prev, [id]: 'reset' }));
         try {
             // Utilisation de la simulation
-            const res = await api.post(`${API_URL}/reset-password`, {}, config);
+            const res = await api.post(`${API_URL}/reset-password`, {
+                id
+            }, config);
             const newPassword = res.data.password;
             //toast.success(`Mot de passe réinitialisé ! Nouveau mot de passe: ${newPassword}`, { autoClose: 8000 });
             alert(`Utilisateur créé ! Mot de passe: ${newPassword}`);

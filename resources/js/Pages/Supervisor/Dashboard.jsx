@@ -149,7 +149,7 @@ export default function Dashboard(props) {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        
+
         <div className="bg-white rounded-lg shadow p-4 w-full overflow-auto">
           <h3 className="text-lg font-semibold mb-3">Anomalies récentes</h3>
           <AnomaliesTable items={anomalies} />
