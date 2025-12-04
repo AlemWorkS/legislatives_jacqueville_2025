@@ -15,7 +15,6 @@ return new class extends Migration
             //
             $table->string('nom')->default('')->change();
             $table->string('prenom')->default('')->change();
-            $table->string('is_admin')->default(false)->change();
             $table->unsignedBigInteger('role_id')->default(4)->change();
         });
     }

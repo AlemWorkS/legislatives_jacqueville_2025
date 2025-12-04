@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::table('lieux', function (Blueprint $table) {
             // add a foreign key to centres table
-             $table->foreignId('centre_id')->constrained('centre');
+             $table->foreignId('centre_id')->constrained('centres');
         });
     }
 

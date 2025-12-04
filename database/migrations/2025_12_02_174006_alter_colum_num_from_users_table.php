@@ -14,12 +14,10 @@ return new class extends Migration
         Schema::table('users', function (Blueprint $table) {
             //
             // make column default value empty string
-            $table->string('num')->default('')->change();
-            $table->string('nom')->default('')->change();
-            $table->string('prenom')->default('')->change();
-            $table->string('is_admin')->default(false)->change();
+            $table->string('num',10)->default('')->change();
+            $table->string('nom',50)->default('')->change();
+            $table->string('prenom',120)->default('')->change();
             $table->unsignedBigInteger('role_id')->default(4)->change();
-            $table->string('role')->default('guest')->change();
 
 
         });

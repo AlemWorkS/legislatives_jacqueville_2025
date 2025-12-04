@@ -10,7 +10,6 @@ class Candidat extends Model
     protected $fillable = [
         'nom',
         'sexe',
-        'telephone',
     ];
 
     protected $casts = [

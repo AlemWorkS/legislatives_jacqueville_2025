@@ -9,9 +9,8 @@ return new class extends Migration {
     {
         Schema::create('candidats', function (Blueprint $table) {
             $table->id();
-            $table->string('nom');
+            $table->string('nom',150);
             $table->enum('sexe', ['M', 'F'])->nullable();
-            $table->string('telephone')->nullable();
             $table->timestamps();
         });
     }
