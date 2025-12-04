@@ -12,8 +12,11 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('lieux', function (Blueprint $table) {
-            // add a foreign key to centres table
-             $table->foreignId('centre_id')->constrained('centres');
+            if (!Schema::hasColumn('lieux', 'centre_id')) {
+
+                // add a foreign key to centres table
+                $table->foreignId('centre_id')->constrained('centres');
+            }
         });
     }
 
