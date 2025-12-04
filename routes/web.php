@@ -17,18 +17,16 @@ use Inertia\Inertia;
 
 require __DIR__ . '/auth.php';
 
+Route::get('', [AuthController::class, 'showLogin'])->name('login');
 
 // CONNEXION
 Route::middleware('guest')->group(function () {
-    Route::get('/', [AuthController::class, 'showLogin'])
-        ->name('login');
-    Route::get('login', [AuthController::class, 'showLogin'])
-        ->name('login');
+    Route::get('login', [AuthController::class, 'showLogin'])->name('login');
 });
 
 // ADMIN ROUTES
 
-Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
+Route::middleware(['admin'])->prefix('admin')->group(function () {
 
     Route::get('/', function () {
         return Inertia::render('AdminDashboard', [
@@ -54,7 +52,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
 
 
 
-Route::middleware(['auth'])->prefix('supervisor')->group(function () {
+Route::middleware(['sup'])->prefix('supervisor')->group(function () {
     // Metrics, stats, zones, etc.
     Route::get('/', [SupervisorController::class, 'index'])->name('supervisor.dashboard');
     Route::get('metrics', [SupervisorController::class, 'metrics']);
@@ -83,7 +81,7 @@ Route::middleware(['auth'])->prefix('supervisor')->group(function () {
 
 // AGENT BUREAU ROUTES
 
-Route::middleware(['auth', 'agent_bureau'])->prefix('agent_bureau')->group(function () {
+Route::middleware(['agent_bureau'])->prefix('agent_bureau')->group(function () {
 
     Route::get('/dashboard', [RecenserController::class, 'index']);
     Route::post('store', [RecenserController::class, 'storeRecensement']);

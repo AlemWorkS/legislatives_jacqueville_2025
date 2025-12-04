@@ -17,14 +17,6 @@ export default function Login({ status, canResetPassword }) {
         remember: false,
     });
 
-    const submit = (e) => {
-        e.preventDefault();
-
-        Inertia.post(route('login'), {
-            onFinish: () => reset('password'),
-        });
-    };
-
     return (
         <GuestLayout>
             <Head title="Log in" />
